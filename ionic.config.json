@@ -1,0 +1,7 @@
+{
+  "name": "rogan",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
