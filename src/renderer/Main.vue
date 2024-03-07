@@ -189,7 +189,8 @@ import { ref, defineComponent } from 'vue';
 import { useIonRouter } from '@ionic/vue'
 import { newspaper, newspaperOutline, home, homeOutline, person, personOutline, settings, settingsOutline, menu, menuOutline, chatboxOutline, chatboxEllipsesOutline, add, document, colorPalette, globe, locationOutline, location, calendar } from 'ionicons/icons';
 import { IonPage, IonContent, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons, IonMenu, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonFab, IonFabButton, IonFabList, IonList, IonItem, IonFooter, IonInput, IonSelect, IonSelectOption, IonProgressBar, IonButton, IonDatetime, IonMenuToggle } from '@ionic/vue';
-
+import { DataService } from "@/services/DataService";
+const dataService = DataService.getInstance();
 
 const controller = new AbortController();
 const signal = controller.signal;
@@ -230,9 +231,9 @@ export default defineComponent({
   components: { IonPage, IonContent, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons, IonMenu, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonFab, IonFabButton, IonFabList, IonList, IonItem, IonFooter, IonInput, IonSelect, IonSelectOption, IonProgressBar, IonButton, IonDatetime, IonMenuToggle },
   data() {
     return { 
-      currentPostData: [],
-      serverNewsData: [],
-      serverPostData: [],
+      currentPostData: [] as any[],
+      serverNewsData: [] as any[],
+      serverPostData: [] as any[],
       newspaper, newspaperOutline, home, homeOutline, person, personOutline, settings, settingsOutline, menu, menuOutline, chatboxOutline, chatboxEllipsesOutline, add, document, colorPalette, globe, active, modal, states, displayPost, buttonStatus, locationOutline, location, calendar
     };
   },
@@ -241,14 +242,24 @@ export default defineComponent({
   },
   methods: {
     async getNewsData() : Promise<Record<string, any>[]> {
-      const response = await fetch('src/assets/testData.json')
-      const data = await response.json();
+      // const response = await fetch('src/assets/testData.json');
+      // const response = await fetch(new URL(API_URL + '/dev/posts'));
+      // const all_data = await response.json();
+      // console.debug("Data from API: ", all_data);
+      // const data = all_data.filter( (doc:any) => { return doc.docType == 'NEWS'});
+      const data = await dataService.getData("NEWS");
+      console.debug("News data from API: ", data);
       this.serverNewsData = data;
       return data;
     },
     async getPostData() : Promise<Record<string, any>[]> {
-      const response = await fetch('src/assets/testPosts.json')
-      const data = await response.json();
+      // const response = await fetch('src/assets/testPosts.json')
+      // const response = await fetch(new URL(API_URL + '/dev/posts'));
+      // const all_data = await response.json();
+      // console.debug("Data from API: ", all_data);
+      // const data = all_data.filter( (doc:any) => { return doc.docType == 'POST'});
+      const data = await dataService.getData("POST");
+      console.debug("Posts data from API: ", data);
       this.serverPostData = data;
       return data;
     },
