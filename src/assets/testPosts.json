@@ -1,65 +1,72 @@
 [
     {
         "title": "FOUR A hits in a row from 9 Pandas",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "Oh Astralis. They thought they cracked the code. But Denis 'seized' Kostin just calls another A pop out of spawn and they're swept away. Conditioning restored.",
         "date": "2/23/2024",
         "user": "Bob",
         "location": "Raleigh, NC",
-        "id": 0
+        "id": "k34hj"
     },
     {
         "title": "The NertZ factor",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "The 14-2 streak Guy 'NertZ' Iluz went on at the start of Mirage was absolutely cruical to this map win. He ends just shy of the 2.00 rating mark, but what a performance.",
         "date": "2/20/2024",
         "user": "Bob",
         "location": "Raleigh, NC",
-        "id": 1
+        "id": "h07kj"
     },
     {
         "title": "Mega gla1ve impact puts ENCE in the lead",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "ENCE take their first lead in the match since round four in overtime off the back of mega impact from Lukas 'gla1ve' Rossander. His quad-kill in a 3v5 featuring crucial smoke kills and a double and two assists yield ENCE two rounds in the first half of overtime.",
         "date": "2/20/2024",
         "user": "Bob",
         "location": "Raleigh, NC",
-        "id": 2
+        "id": "jeitu"
     },
     {
         "title": "Monte drop after ECSTATIC loss",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "A rough showing from Monte in Bucharest, as they fall to ECSTATIC on Anubis. The Ukrainian team got off to a solid start but lost steam as the first half wore on. ECSTATIC maintained their momentum on the T side and easily dispatched their opponents.",
         "date": "2/19/2024",
         "user": "Bob",
         "location": "Raleigh, NC",
-        "id": 3
+        "id": "jjd94"
     },
     {
         "title": "OG stumble to four rounds",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "With the economy so firmly in control of Apeks there wasn't much OG could do when they lost all the key rounds, but they keep themselves in the fight with some solitary rounds.",
         "date": "2/19/2024",
         "location": "Raleigh, NC",
         "user": "Bob",
-        "id": 4
+        "id": "jdi35"
     },
     {
         "title": "k1to with hidden insight into the BIG ways?",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "Nils 'k1to' Gruhne to James 'BanKs' Banks on in-game leadership: 'The hardest thing is to make the players happy, to tell them in a way that they understand. You're not thinking they're stupid or something but maybe that we can play different the next time, that's really hard.",
         "date": "2/19/2024",
         "location": "Raleigh, NC",
         "user": "Bob",
-        "id": 5
+        "id": "jsdit"
     },
     {
         "title": "Spirit secure the 13-0 over ENCE",
+        "docType": "POST",
         "image": "src/img/hltv.png",
         "content": "That map ended earlier than the other match even started. That's the second Spirit 13-0 in two tournaments- they also started IEM Katowice flawless against Apeks",
         "date": "2/19/2024",
         "location": "Raleigh, NC",
         "user": "Bob",
-        "id": 6
+        "id": "wpdki"
     }
 ]
