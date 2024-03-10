@@ -17,7 +17,13 @@ export class DataService {
   }
 
   public getData = async (docType: string): Promise<Record<string, any>[]> => {
-    const response = await fetch(new URL(API_URL + '/dev/posts'));
+    const response = await fetch(new URL(API_URL + '/dev/posts'), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // mode: "cors",
+    });
     const all_data = await response.json();
     // console.debug("Data from API: ", all_data);
     const data = all_data.filter( (doc:any) => { return doc.docType == docType});
@@ -35,14 +41,14 @@ export class DataService {
   public postData = async (data: Record<string, any>) => {
     const response = await fetch(new URL(API_URL + '/dev/posts'), {
       method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      credentials: "same-origin",
+      // mode: "cors",
+      // cache: "no-cache",
+      // credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
       },
-      redirect: "follow",
-      referrerPolicy: "no-referrer",
+      // redirect: "follow",
+      // referrerPolicy: "no-referrer",
       body: JSON.stringify(data),
     });
     return response.json();  
