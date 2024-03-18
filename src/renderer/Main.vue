@@ -36,12 +36,14 @@
   </ion-menu>
   <ion-page id="main">
     <ion-header id="header">
-      <ion-buttons class="button" slot="start">
-        <ion-menu-button id="menuButton"></ion-menu-button>
+      <ion-buttons slot="start">
+        <ion-menu-button id="menuButtonWrapper">
+          <ion-icon id="menuButton" :icon="menu"/>  
+        </ion-menu-button>
       </ion-buttons>
     </ion-header>
 
-    <ion-content id="test3" class="ion-padding"> 
+    <ion-content class="ion-padding"> 
       <p v-if="active[0] == true">
         <div v-for="data in serverNewsData">
           <ion-card>
@@ -58,9 +60,9 @@
       </p>
 
       <p v-if="active[1] == true">
-        <div v-for="data in serverPostData">
+        <div v-for="data in serverPostData" :key="data.id">
           <ion-card :disabled="isDisabled" @click="onViewPost(data.id)">
-            <img class="card" alt="card image" :src="data.image"/>
+            <img class="card" alt="card image" :src="`https://conferencereports.s3.amazonaws.com/assets/rsa/${data.image.toLowerCase()}.png`"/>
             <ion-card-header>
               <ion-card-title> {{ data.title }} </ion-card-title>
               <ion-card-subtitle> {{ data.date }} </ion-card-subtitle>
@@ -83,26 +85,37 @@
       <p v-if="active[2] == true">
         <ion-label class="menuHeader">Listed Jobs</ion-label>
         <ion-list lines="full">
-          <ion-item>
-            <ion-label>Full Lines</ion-label>
-          </ion-item>
-          <ion-item>
-            <ion-label>Full Lines</ion-label>
-          </ion-item>
-          <ion-item>
-            <ion-label>Full Lines</ion-label>
-          </ion-item>
+          <div v-for="data in serverPostedData">
+            <ion-item>
+              <ion-label> {{ data.title }} ({{ data.date.substring(0, 10) }})</ion-label>
+            </ion-item>
+          </div>
+          <p v-if="serverPostedData.length == 0">
+            <ion-item>
+              <ion-label>You don't have any job listings!</ion-label>
+            </ion-item>
+          </p>
         </ion-list>
         <ion-label class="menuHeader">Accepted Jobs</ion-label>
         <ion-list lines="full">
+          <div v-for="data in serverAcceptedData">
+            <ion-item>
+              <ion-label> {{ data.title }} ({{ data.date.substring(0, 10) }})</ion-label>
+            </ion-item>
+          </div>
+          <p v-if="serverAcceptedData.length == 0">
+            <ion-item>
+              <ion-label>You don't have any accepted listings!</ion-label>
+            </ion-item>
+          </p>
+        </ion-list>
+      </p>
+
+      <p v-if="active[3] == true">
+        <ion-label class="menuHeader">Nothing here yet!</ion-label>
+        <ion-list lines="full">
           <ion-item>
-            <ion-label>Full Lines</ion-label>
-          </ion-item>
-          <ion-item>
-            <ion-label>Full Lines</ion-label>
-          </ion-item>
-          <ion-item>
-            <ion-label>Full Lines</ion-label>
+            <ion-label>Check again in a future update.</ion-label>
           </ion-item>
         </ion-list>
       </p>
@@ -114,31 +127,27 @@
           <ion-progress-bar type="indeterminate"></ion-progress-bar>
           <p v-if="modal == 0">
             <div id="date">
-              <ion-datetime fill="outline"></ion-datetime>
+              <ion-datetime v-model.lazy="input.date" fill="outline"></ion-datetime>
             </div>
           </p>
           <p v-if="modal == 1">
             <div>
                 <h1 class="modal-header">Job Details</h1>
             </div>
-            <ion-select class="input" fill="outline" interface="action-sheet" placeholder="Job">
+            <ion-select v-model.lazy="input.image" class="input" fill="outline" interface="action-sheet" placeholder="Category">
               <div v-for="job in jobs">
                 <ion-select-option :value="`${job}`">{{ job }}</ion-select-option>
               </div> 
             </ion-select>
 
-            <ion-select class="input" fill="outline" interface="action-sheet" placeholder="State">
-              <div v-for="state in states">
-                <ion-select-option :value="`${state}`">{{ state }}</ion-select-option>
-              </div> 
-            </ion-select>
+            <ion-input v-model.lazy="input.title" class="input" label="Title" label-placement="floating" fill="outline" placeholder="Enter text"></ion-input>
 
-            <ion-input class="input" label="City" label-placement="floating" fill="outline" placeholder="Enter text"></ion-input>
+            <ion-input v-model.lazy="input.content" class="input" label="Description" label-placement="floating" fill="outline" placeholder="Enter text"></ion-input>
 
-            <ion-input class="input" label="Address*" label-placement="floating" fill="outline" placeholder="Enter text"></ion-input>
-            <div id="disclaimerWrapper">
-              <ion-label class="disclaimer">*will only be displayed once job is accepted</ion-label>
-            </div>
+            <ion-input v-model.lazy="input.location" class="input" label="Location" label-placement="floating" fill="outline" placeholder="Enter text"></ion-input>
+
+            <ion-input v-model.lazy="input.user" class="input" label="Name" label-placement="floating" fill="outline" placeholder="Enter text"></ion-input>
+            
           </p>
           <p v-if="modal != 1">
             <ion-button id="next" fill="clear"  @click="onClickModal(true)">Next</ion-button>
@@ -184,6 +193,7 @@
             </div>
           </div>
           <ion-button id="buttonWrapper" @click="onAcceptJob()">accept job</ion-button>
+          <ion-toast color="light" id="toast" trigger="buttonWrapper" message="Job Accepted Sucessfully" :duration="2000"></ion-toast>
         </ion-card>
       </p>
     </Transition>
@@ -238,39 +248,42 @@
   
 <script lang="ts">
 import { ref, defineComponent } from 'vue';
-import { useIonRouter } from '@ionic/vue'
+import { toastController, useIonRouter } from '@ionic/vue'
 import { newspaper, newspaperOutline, home, homeOutline, person, personOutline, settings, settingsOutline, menu, menuOutline, chatboxOutline, chatboxEllipsesOutline, add, document, colorPalette, globe, locationOutline, location, calendar, build } from 'ionicons/icons';
-import { IonPage, IonContent, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons, IonMenu, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonFab, IonFabButton, IonFabList, IonList, IonItem, IonFooter, IonInput, IonSelect, IonSelectOption, IonProgressBar, IonButton, IonDatetime, IonMenuToggle } from '@ionic/vue';
+import { IonPage, IonContent, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons, IonMenu, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonFab, IonFabButton, IonFabList, IonList, IonItem, IonFooter, IonInput, IonSelect, IonSelectOption, IonProgressBar, IonButton, IonDatetime, IonMenuToggle, IonToast } from '@ionic/vue';
 import { DataService } from "@/services/DataService";
 const dataService = DataService.getInstance();
+
+import { generateShortUUID } from "@/services/Utils";
 
 const controller = new AbortController();
 const signal = controller.signal;
 
-async function postData(url = "aws.json2json.com/postss", data = {}) {
-  const response = await fetch(url, {
-    method: "POST",
-    mode: "cors",
-    cache: "no-cache",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    redirect: "follow",
-    referrerPolicy: "no-referrer",
-    body: JSON.stringify(data),
-  });
-  return response.json();
-}
-
 let states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
-let jobs = ['placeholder1', 'placeholder2']
+let jobs = ['Garden', 'Music', 'Woodwork', 'Masonry', 'Painting']
 let active = ref([true, false, false, false])
 let displayPost = ref(false);
 let modal = ref(0)
 let disable = ref(false)
 
+let postValidate: string[] = ['docType', 'id', 'user', 'location', 'date', 'title', 'content', 'image'];
+
 let buttonStatus = ref(false);
+
+const uuid = null
+
+const input = ref({
+    docType: "POST",
+    id: generateShortUUID(),
+    user: '',
+    location: '',
+    date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString(),
+    title: '',
+    content: '',
+    image: '',
+    from: '',
+    to: ''
+})
 
 function stall(func: () => void, ms: number | undefined) {
   return new Promise(() => {
@@ -280,13 +293,15 @@ function stall(func: () => void, ms: number | undefined) {
 
 export default defineComponent({
   name: "AppHeader",
-  components: { IonPage, IonContent, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons, IonMenu, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonFab, IonFabButton, IonFabList, IonList, IonItem, IonFooter, IonInput, IonSelect, IonSelectOption, IonProgressBar, IonButton, IonDatetime, IonMenuToggle },
+  components: { IonPage, IonContent, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel, IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons, IonMenu, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonFab, IonFabButton, IonFabList, IonList, IonItem, IonFooter, IonInput, IonSelect, IonSelectOption, IonProgressBar, IonButton, IonDatetime, IonMenuToggle, IonToast, toastController },
   data() {
     return { 
-      currentPostData: [] as any[],
+      currentPostData: {} as Record<string, any>,
       serverNewsData: [] as any[],
       serverPostData: [] as any[],
-      newspaper, newspaperOutline, home, homeOutline, person, personOutline, settings, settingsOutline, menu, menuOutline, chatboxOutline, chatboxEllipsesOutline, add, document, colorPalette, globe, active, modal, states, displayPost, buttonStatus, locationOutline, location, calendar, build, jobs
+      serverPostedData: [] as any[],
+      serverAcceptedData: [] as any[],
+      newspaper, newspaperOutline, home, homeOutline, person, personOutline, settings, settingsOutline, menu, menuOutline, chatboxOutline, chatboxEllipsesOutline, add, document, colorPalette, globe, active, modal, states, displayPost, buttonStatus, locationOutline, location, calendar, build, jobs, input
     };
   },
   setup() {
@@ -304,23 +319,57 @@ export default defineComponent({
       this.serverNewsData = data;
       return data;
     },
-    async getPostData() : Promise<Record<string, any>[]> {
-      // const response = await fetch('src/assets/testPosts.json')
-      // const response = await fetch(new URL(API_URL + '/dev/posts'));
-      // const all_data = await response.json();
-      // console.debug("Data from API: ", all_data);
-      // const data = all_data.filter( (doc:any) => { return doc.docType == 'POST'});
+    async getPostedData() : Promise<Record<string, any>[]> {
+      this.serverPostedData = [];
       const data = await dataService.getData("POST");
-      console.debug("Posts data from API: ", data);
-      this.serverPostData = data;
+      for (var i = 0; i < data.length; i++) {
+        this.fetchUUID();
+        const uuid = localStorage.getItem("uuid");
+        if (data[i]['from'] == uuid) {
+          console.log("found")
+          this.serverPostedData.push(data[i]);
+        }
+      }
       return data;
     },
-    async getPostDataForIndex(index: number) : Promise<Record<string, any>[]> {
-      disable.value = !disable.value;
-      const response = await fetch('src/assets/testPosts.json')
-      const data = await response.json();
-      this.currentPostData = data[index];
+    async getAcceptedData() : Promise<Record<string, any>[]> {
+      this.serverAcceptedData = [];
+      const data = await dataService.getData("POST");
+      for (var i = 0; i < data.length; i++) {
+        this.fetchUUID();
+        const uuid = localStorage.getItem("uuid");
+        if (data[i]['to'] == uuid) {
+          console.log("found")
+          this.serverAcceptedData.push(data[i]);
+        }
+      }
       return data;
+    },
+    async getPostData() : Promise<Record<string, any>[]> {
+      const data = await dataService.getData("POST");
+      console.debug("Posts data from API: ", data);
+
+      this.serverPostData = data.sort(function(a,b){
+        return (new Date(b.date).getTime() - new Date(a.date).getTime())
+      });
+
+      return data;
+    },
+    async presentToast(variant: string) {
+        const toast = await toastController.create({
+          color: 'light',
+          message: variant,
+          duration: 2000,
+          position: 'bottom',
+          cssClass: 'toast'
+        });
+
+        await toast.present();
+      },
+    getPostDataForIndex(index: string) {
+      disable.value = !disable.value;
+      const data = this.serverPostData.filter( (d) => { return d.id == index} )[0];
+      this.currentPostData = data;
     },
     onChangePage(page: number) {
       active.value = [false, false, false, false];
@@ -342,7 +391,7 @@ export default defineComponent({
       displayPost.value = false;
       disable.value = !disable.value;
     },
-    onViewPost(post: number) {
+    onViewPost(post: string) {
       this.getPostDataForIndex(post);
       buttonStatus.value = true;
       disable.value = true;
@@ -358,9 +407,68 @@ export default defineComponent({
       displayPost.value = false;
       disable.value = false;
       console.log("job");
+
+      
+      let output = {...this.currentPostData};
+      output = this.appendUUIDto(output);
+      console.log("onAcceptJob: ", output);
+
+      dataService.postData(output);
+
+      this.getPostedData();
+      this.getAcceptedData();
     },
     onClickSubmit() {
       console.log("submit");
+      console.log(input.value);
+
+      var validated = 0;
+
+      // for (var i = 0; i < postValidate.length; i++) {
+      //   if (input.value[postValidate[i]] != '') {
+      //     validated ++;
+      //   }
+      // }
+
+      postValidate.forEach( (k: string) => {
+        const inputObj: Record<string, any> = input.value;
+        if (inputObj[k] != '') {
+          validated ++;
+        }
+      })
+
+      console.log(validated);
+
+      if (validated == 8) {
+        this.appendUUID();
+        dataService.postData(input.value);
+        this.presentToast('Post Created Succesfully');
+      }
+      else {
+        this.presentToast('Missing Required Fields');
+      }
+
+      this.getPostedData();
+      this.getAcceptedData();
+    },
+    appendUUID() {
+      this.fetchUUID();
+      const uuid = localStorage.getItem("uuid");
+      if (uuid) {
+        input.value['from'] = uuid.toString();
+      }
+    },
+    appendUUIDto(data: Record<string, any>) {
+      this.fetchUUID();
+      const userId = localStorage.getItem("uuid") || "";
+      data.to = userId.toString();
+      // console.debug("appendUUIDTo: ", output);
+      return data;
+    },
+    fetchUUID() {
+      if (localStorage.getItem("uuid") == null) {
+        localStorage.setItem("uuid", generateShortUUID());
+      }
     }
   },
   computed: {
@@ -393,6 +501,9 @@ export default defineComponent({
   mounted() {
     this.getNewsData();
     this.getPostData();
+    this.fetchUUID();
+    this.getPostedData();
+    this.getAcceptedData();
   }
 })
 </script>
@@ -400,8 +511,12 @@ export default defineComponent({
 
 <style scoped>
 
+#toast {
+  text-align: center;
+}
+
 #disclaimerWrapper {
-  border: 1px solid red;
+  text-align: center;
 }
 
 .disclaimer {
@@ -422,6 +537,17 @@ export default defineComponent({
 
 #header {
   height: 5%;
+}
+
+
+#menuButtonWrapper {
+  opacity: 1;
+  /* border: 1px solid red; */
+}
+
+#menuButton {
+  opacity: 1;
+  /* border: 1px solid red; */
 }
 
 #buttonWrapper {

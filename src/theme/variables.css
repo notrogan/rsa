@@ -7,6 +7,11 @@ http://ionicframework.com/docs/theming/ */
   font-family: "ClashDisplay"; src: url("../assets/ClashDisplay-Bold.otf"); 
 }
 
+.toast {
+  text-align: center;
+}
+
+
 :root {
   --ion-font-family: "ClashDisplay";
   /** primary **/

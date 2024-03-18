@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">rogan</string>
-    <string name="title_activity_main">rogan</string>
+    <string name="app_name">Task Helper</string>
+    <string name="title_activity_main">Task Helper</string>
     <string name="package_name">io.ionic.starter</string>
     <string name="custom_url_scheme">io.ionic.starter</string>
 </resources>

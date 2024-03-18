@@ -39,6 +39,7 @@ export class DataService {
     * docType: [NEWS, POST]
   */
   public postData = async (data: Record<string, any>) => {
+    console.log("POST Data: ", data);
     const response = await fetch(new URL(API_URL + '/dev/posts'), {
       method: "POST",
       // mode: "cors",
